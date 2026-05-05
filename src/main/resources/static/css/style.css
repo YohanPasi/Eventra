@@ -1,0 +1,22 @@
+body {
+    background-color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+.container {
+    margin-top: 100px;
+}
+
+.logo {
+    width: 200px;
+    margin-bottom: 20px;
+}
+
+h1 {
+    color: #0A2540; /* dark blue */
+}
+
+p {
+    color: #4A90E2; /* light blue (logo color) */
+}
