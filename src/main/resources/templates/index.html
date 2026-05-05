@@ -6,16 +6,45 @@
 </head>
 <body>
 
-<div class="container">
-    <img src="/images/logo.png" alt="Eventra Logo" class="logo">
+<div class="main-wrapper">
+    <div class="left-content">
+        <img src="/images/logo.png" class="logo">
+        
+        <h1>EVENTRA</h1>
+        <p class="subtitle">Smart Ticket Booking System</p>
+        
+        <div class="description">
+            Eventra is your premier gateway to the world's most exciting events. From electrifying tech conferences to mesmerizing music festivals, we make discovering and booking your next unforgettable experience seamless, secure, and stylish. Step into the future of ticketing.
+        </div>
+        
+        <div>
+            <a href="/login"><button>Login</button></a>
+            <a href="/register"><button>Register</button></a>
+        </div>
+    </div>
     
-    <h1>EVENTRA</h1>
-    <p>Smart Ticket Booking System</p>
-    
-    <a href="/login">
-        <button>Login</button>
-    </a>
+    <div class="right-content">
+        <div class="slideshow">
+            <img src="/images/kovid-rathee-tvI9EAcfSvA-unsplash.jpg" class="slide" alt="Event Image 1">
+            <img src="/images/long-truong-0hbiRNbMgM4-unsplash.jpg" class="slide" alt="Event Image 2">
+            <img src="/images/seth-reese-lA2qXhn4L2A-unsplash.jpg" class="slide" alt="Event Image 3">
+            <img src="/images/riley-brockett-ELTHHeTMlx8-unsplash.jpg" class="slide" alt="Event Image 4">
+        </div>
+    </div>
 </div>
+
+<script>
+    let slideIndex = 0;
+    const slides = document.querySelectorAll('.slide');
+    if(slides.length > 0) {
+        slides[0].style.opacity = 1;
+        setInterval(() => {
+            slides[slideIndex].style.opacity = 0;
+            slideIndex = (slideIndex + 1) % slides.length;
+            slides[slideIndex].style.opacity = 1;
+        }, 3500);
+    }
+</script>
 
 </body>
 </html>

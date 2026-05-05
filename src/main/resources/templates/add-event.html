@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add Event - Eventra</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="container">
+    <h2>Add Event</h2>
+
+    <form action="/add-event" method="post">
+        <input type="text" name="name" placeholder="Event Name" required><br><br>
+        <input type="date" name="date" required><br><br>
+        <input type="number" name="price" placeholder="Price" step="0.01" required><br><br>
+        <input type="number" name="availableSeats" placeholder="Seats" required><br><br>
+
+        <button type="submit">Create Event</button>
+    </form>
+</div>
+
+</body>
+</html>

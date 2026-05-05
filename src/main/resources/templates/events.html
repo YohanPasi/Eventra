@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Events - Eventra</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        table {
+            margin: 0 auto;
+            border-collapse: collapse;
+            width: 80%;
+        }
+        th, td {
+            border: 1px solid #4A90E2;
+            padding: 10px;
+        }
+        th {
+            background-color: #0A2540;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Events</h2>
+
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Date</th>
+            <th>Price</th>
+            <th>Seats</th>
+        </tr>
+
+        <tr th:each="event : ${events}">
+            <td th:text="${event.name}"></td>
+            <td th:text="${event.date}"></td>
+            <td th:text="${event.price}"></td>
+            <td th:text="${event.availableSeats}"></td>
+        </tr>
+    </table>
+    
+    <br>
+    <a href="/add-event"><button>Add New Event</button></a>
+    <a href="/"><button>Home</button></a>
+</div>
+
+</body>
+</html>
