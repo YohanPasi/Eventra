@@ -1,2 +1,8 @@
-E1234,Tech Conference,2026-10-15,100.0,50
-Ea3448,Sanchara,2026-05-06,1000.0,500
+E8C7C82|Parasathu Yaaya|BMICH|2026-05-13|Musical Concert|https://res.cloudinary.com/detm79j5t/image/upload/v1778041323/eventra/events/np1ydupinbomv4hwwexa.webp
+E389451|Dharmayuddhaya|Scope Cinema|2026-05-14|New 2026 trending Sinhala movie|https://res.cloudinary.com/detm79j5t/image/upload/v1778041462/eventra/events/ninatsacfpbm81xes9lq.avif
+E36162F|Marians Unplugged|Colombo|2026-05-12|Musical Concert|https://res.cloudinary.com/detm79j5t/image/upload/v1778041568/eventra/events/ucsbontvshplrjcerm2g.webp
+E0E37C8|BNS Show|Nelum Pokuna Open Theater|2026-05-19|Musical Concert|https://res.cloudinary.com/detm79j5t/image/upload/v1778041647/eventra/events/d1mvateeewly6grgaa8z.webp
+E09808B|Charikawak|BMICH|2026-05-26|Musical Concert|https://res.cloudinary.com/detm79j5t/image/upload/v1778043857/eventra/events/ddquagr8qf3tzq38cn4x.jpg
+EADD276|SLAASC|Nugegoda|2026-05-28|SLAASC Events|https://res.cloudinary.com/detm79j5t/image/upload/v1778044050/eventra/events/iajl4pqpyla0qzvgejgi.jpg
+EDCEBD8|Wayo Live in concert|Nelum Pokuna Open Theater|2026-05-19|Musical Event|https://res.cloudinary.com/detm79j5t/image/upload/v1778044128/eventra/events/gxaunwqig5wo5flxmxek.jpg
+E46A5AB|Paradeesaya|Rathnapura|2026-06-17|Musical Concert|https://res.cloudinary.com/detm79j5t/image/upload/v1778044188/eventra/events/blf6qpee0rfpvdu2sb7d.jpg

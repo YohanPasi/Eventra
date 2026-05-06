@@ -1,49 +1,495 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <title>Events - Eventra</title>
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        table {
-            margin: 0 auto;
-            border-collapse: collapse;
-            width: 80%;
+        body {
+            background: linear-gradient(135deg, #f0f4ff, #ffffff);
+            text-align: left;
         }
-        th, td {
-            border: 1px solid #4A90E2;
-            padding: 10px;
+
+        .dashboard-wrapper {
+            display: flex;
+            min-height: 100vh;
         }
-        th {
-            background-color: #0A2540;
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background: #0A2540;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .sidebar .brand {
+            font-family: 'Playfair Display', serif;
             color: white;
+            font-size: 22px;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .sidebar .welcome {
+            color: #a0c4ff;
+            font-size: 13px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .sidebar a {
+            text-decoration: none;
+            color: #cde4ff;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .sidebar .logout-btn {
+            margin-top: auto;
+            color: #ff8080;
+        }
+
+        .sidebar .admin-badge {
+            background: #4A90E2;
+            color: white;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-left: auto;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        /* Top Header */
+        .top-header {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #e0e8f5;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            color: #444;
+            font-weight: 500;
+        }
+
+        .user-profile img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        /* Footer */
+        .dashboard-footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e8f5;
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            color: #888;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 36px;
+            color: #0A2540;
+            margin: 0;
+        }
+
+        /* Admin Add Button */
+        .btn-add {
+            background: linear-gradient(135deg, #4A90E2, #357ABD);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(74, 144, 226, 0.4);
+        }
+
+        /* Event Cards - NEW DESIGN */
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            padding-top: 15px;
+        }
+
+        .event-card {
+            background: transparent;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .event-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(10, 37, 64, 0.12);
+        }
+
+        .event-img-wrapper {
+            position: relative;
+            width: 100%;
+            height: 220px;
+            border-radius: 20px 20px 0 0;
+            overflow: hidden;
+            background: #eef3fc;
+            z-index: 1;
+        }
+
+        .event-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .event-card:hover .event-img {
+            transform: scale(1.06);
+        }
+
+        .floating-date {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            color: #0A2540;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .floating-date i {
+            color: #4A90E2;
+        }
+
+        .event-card-content {
+            background: white;
+            padding: 32px 24px 24px;
+            border-radius: 0 0 20px 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 2;
+        }
+
+        .seats-badge {
+            position: absolute;
+            top: -16px;
+            left: 24px;
+            background: linear-gradient(135deg, #4A90E2, #357ABD);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+            border: 3px solid white;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .event-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            color: #0A2540;
+            margin: 0 0 10px;
+            line-height: 1.3;
+        }
+
+        .event-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .event-meta span {
+            font-size: 13px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .event-meta span i {
+            color: #4A90E2;
+            width: 14px;
+            text-align: center;
+        }
+
+        .event-price {
+            font-size: 24px;
+            font-weight: 600;
+            color: #0A2540;
+            margin-bottom: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #f0f4ff;
+        }
+
+        .event-price span {
+            font-size: 13px;
+            font-weight: 400;
+            color: #888;
+            display: block;
+            margin-top: -2px;
+        }
+
+        /* Action buttons inside card */
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: auto;
+        }
+
+        .btn-book {
+            background: linear-gradient(135deg, #4A90E2, #357ABD);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .btn-book:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4);
+        }
+
+        .btn-danger {
+            background: #fff0f0;
+            color: #d63031;
+            border: 1px solid #ffd5d5;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .btn-danger:hover {
+            background: #ffe0e0;
+            border-color: #ffbaba;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 80px 0;
+            color: #888;
+        }
+
+        .empty-state i {
+            font-size: 56px;
+            color: #cde4ff;
+            margin-bottom: 16px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
+
 <body>
 
-<div class="container">
-    <h2>Events</h2>
+    <div class="dashboard-wrapper">
 
-    <table>
-        <tr>
-            <th>Name</th>
-            <th>Date</th>
-            <th>Price</th>
-            <th>Seats</th>
-        </tr>
+        <!-- ── Sidebar ── -->
+        <div class="sidebar">
+            <div class="brand">EVENTRA</div>
+            <div class="welcome">
+                Welcome, <strong th:text="${username}">User</strong>
+            </div>
 
-        <tr th:each="event : ${events}">
-            <td th:text="${event.name}"></td>
-            <td th:text="${event.date}"></td>
-            <td th:text="${event.price}"></td>
-            <td th:text="${event.availableSeats}"></td>
-        </tr>
-    </table>
-    
-    <br>
-    <a href="/add-event"><button>Add New Event</button></a>
-    <a href="/"><button>Home</button></a>
-</div>
+            <!-- USER Sidebar -->
+            <div th:if="${role == 'USER'}">
+                <a href="/events" class="active"><i class="fa fa-calendar-alt"></i> Events</a>
+                <a href="/my-tickets"><i class="fa fa-ticket-alt"></i> My Tickets</a>
+            </div>
+
+            <!-- ADMIN Sidebar -->
+            <div th:if="${role == 'ADMIN'}">
+                <a href="/events" class="active"><i class="fa fa-calendar-alt"></i> Manage Events</a>
+                <a href="/add-event"><i class="fa fa-plus-circle"></i> Add Event <span
+                        class="admin-badge">ADMIN</span></a>
+            </div>
+
+            <a href="/logout" class="logout-btn" style="margin-top: auto;"><i class="fa fa-sign-out-alt"></i> Logout</a>
+        </div>
+
+        <!-- ── Main Content ── -->
+        <div class="main-content">
+            <!-- Top Header -->
+            <div class="top-header">
+                <div class="user-profile">
+                    <img src="/images/kovid-rathee-tvI9EAcfSvA-unsplash.jpg" alt="User Profile"
+                        th:if="${role == 'USER'}">
+                    <img src="/images/long-truong-0hbiRNbMgM4-unsplash.jpg" alt="Admin Profile"
+                        th:if="${role == 'ADMIN'}">
+                    <span th:text="${username}">User</span>
+                </div>
+            </div>
+
+            <div class="page-header">
+                <h1 th:if="${role == 'ADMIN'}"><i class="fa fa-cog" style="font-size:28px;"></i> Manage Events</h1>
+                <h1 th:if="${role == 'USER'}">Upcoming Events</h1>
+
+                <!-- Add Event button ONLY for ADMIN -->
+                <a href="/add-event" class="btn-add" th:if="${role == 'ADMIN'}">
+                    <i class="fa fa-plus"></i> Add New Event
+                </a>
+            </div>
+
+            <!-- Events Grid -->
+            <div class="events-grid" th:if="${#lists.size(events) > 0}">
+                <div class="event-card" th:each="event : ${events}">
+                    <img th:if="${event.imageUrl != null and event.imageUrl != ''}" th:src="${event.imageUrl}"
+                        class="event-img" alt="Event Image">
+                    <div th:if="${event.imageUrl == null or event.imageUrl == ''}" class="event-img"
+                        style="display:flex;align-items:center;justify-content:center;color:#b5cff5;font-size:32px;">
+                        <i class="fa fa-image"></i>
+                    </div>
+
+                    <div class="event-card-content">
+                        <h3 th:text="${event.name}">Event Name</h3>
+                        <div class="event-meta">
+                            <span><i class="fa fa-calendar"></i> <span th:text="${event.date}">Date</span></span>
+                            <span><i class="fa fa-map-marker-alt"></i> <span
+                                    th:text="${event.location}">Location</span></span>
+                            <span><i class="fa fa-chair"></i> <span class="seats-badge"
+                                    th:text="${event.totalSeats} + ' total seats'"></span></span>
+                        </div>
+                        <div class="event-price" style="margin-top: auto;">
+                            <span th:if="${event.startingPrice > 0}">From Rs. <span
+                                    th:text="${event.startingPrice}">0.00</span></span>
+                            <span th:if="${event.startingPrice == 0}">Free Event</span>
+                        </div>
+
+                        <!-- USER Actions -->
+                        <div class="card-actions" th:if="${role == 'USER'}">
+                            <button class="btn-book"><i class="fa fa-ticket-alt"></i> Book Ticket</button>
+                            <button class="btn-book" style="background: linear-gradient(135deg,#34a85a,#2d8c4e);"><i
+                                    class="fa fa-calendar-plus"></i> Add to Calendar</button>
+                        </div>
+
+                        <!-- ADMIN Actions -->
+                        <div class="card-actions" th:if="${role == 'ADMIN'}">
+                            <a th:href="@{/edit-event/{id}(id=${event.eventId})}" class="btn-book"
+                                style="text-decoration:none;"><i class="fa fa-edit"></i> Edit</a>
+                            <form th:action="@{/delete-event/{id}(id=${event.eventId})}" method="post"
+                                style="display:inline;"
+                                onsubmit="return confirm('Are you sure you want to delete this event?');">
+                                <button type="submit" class="btn-danger"><i class="fa fa-trash"></i> Delete</button>
+                            </form>
+                        </div>
+                    </div> <!-- End event-card-content -->
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" th:if="${#lists.size(events) == 0}">
+                <i class="fa fa-calendar-times"></i>
+                <p>No events found. <span th:if="${role == 'ADMIN'}">Click <strong>Add New Event</strong> to get
+                        started.</span></p>
+            </div>
+
+            <!-- Dashboard Footer -->
+            <div class="dashboard-footer">
+                &copy; 2026 Eventra. All rights reserved. Premium Event Management System.
+            </div>
+        </div>
+
+    </div>
 
 </body>
+
 </html>

@@ -1,21 +1,75 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Login - Eventra</title>
     <link rel="stylesheet" href="/css/style.css">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="auth-body">
 
-<div class="container">
+<div class="toast-container" th:if="${param.error}">
+    <div class="toast">
+        <i class="fa fa-exclamation-circle"></i>
+        <span>Invalid username or password!</span>
+    </div>
+</div>
+
+<div class="glass-card">
     <h2>Login</h2>
 
-    <form action="/login" method="post">
-        <input type="email" name="email" placeholder="Email" required><br><br>
-        <input type="password" name="password" placeholder="Password" required><br><br>
+    <form action="/login" method="post" id="loginForm">
 
-        <button type="submit">Login</button>
+        <div class="input-group">
+            <input type="text" name="username" id="username" placeholder="Username" required>
+            <i class="fa fa-times clear-icon" onclick="clearField('username')" title="Clear"></i>
+        </div>
+
+        <div class="input-group">
+            <input type="password" name="password" id="password" placeholder="Password" required>
+            <i class="fa fa-times clear-icon" onclick="clearField('password')" title="Clear" style="right: 45px;"></i>
+            <i class="fa fa-eye eye-icon" onclick="togglePassword('password', this)" title="Show Password"></i>
+        </div>
+
+        <button type="submit" class="btn-auth" id="submitBtn" disabled>Login</button>
     </form>
+    <p style="margin-top: 20px; font-size: 14px; color: #fff;">Don't have an account? <a href="/register" style="color: #4A90E2; font-weight: bold; text-decoration: none;">Register</a></p>
 </div>
+
+<script>
+    function clearField(id) {
+        document.getElementById(id).value = '';
+        validateForm();
+    }
+
+    function togglePassword(id, icon) {
+        const input = document.getElementById(id);
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = "password";
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+
+    document.getElementById('username').addEventListener('input', validateForm);
+    document.getElementById('password').addEventListener('input', validateForm);
+
+    function validateForm() {
+        const un = document.getElementById('username').value;
+        const pw = document.getElementById('password').value;
+        const btn = document.getElementById('submitBtn');
+
+        if (un.length > 0 && pw.length > 0) {
+            btn.disabled = false;
+        } else {
+            btn.disabled = true;
+        }
+    }
+</script>
 
 </body>
 </html>

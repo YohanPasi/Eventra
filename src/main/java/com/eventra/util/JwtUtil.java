@@ -11,10 +11,10 @@ public class JwtUtil {
     private static final String SECRET = "eventra_super_secret_key_1234567890";
     private static final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
 
-    public static String generateToken(String email, String role, String userId) {
+    public static String generateToken(String username, String role, String userId) {
 
         return Jwts.builder()
-                .setSubject(email)
+                .setSubject(username)
                 .claim("role", role)
                 .claim("userId", userId)
                 .setIssuedAt(new Date())
@@ -29,5 +29,22 @@ public class JwtUtil {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    public static String getRoleFromToken(String token) {
+        try {
+            Claims claims = validateToken(token);
+            return (String) claims.get("role");
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static String getUsernameFromToken(String token) {
+        try {
+            return validateToken(token).getSubject();
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

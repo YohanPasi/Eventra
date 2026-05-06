@@ -22,7 +22,8 @@ public class AuthController {
     @PostMapping("/register")
     public String registerUser(@RequestParam String name,
                                @RequestParam String email,
-                               @RequestParam String password) {
+                               @RequestParam String password,
+                               org.springframework.ui.Model model) {
 
         User user = new User();
         user.setName(name);
@@ -32,7 +33,8 @@ public class AuthController {
         boolean success = userService.registerUser(user);
 
         if (!success) {
-            return "register"; // later show error message
+            model.addAttribute("error", "Username or Email already exists!");
+            return "register"; 
         }
 
         return "redirect:/";
@@ -44,17 +46,17 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestParam String email,
+    public String login(@RequestParam String username,
                         @RequestParam String password,
                         HttpServletResponse response) {
 
-        User user = userService.login(email, password);
+        User user = userService.login(username, password);
 
         if (user == null) {
             return "redirect:/login?error=true";
         }
 
-        String token = JwtUtil.generateToken(user.getEmail(), user.getRole(), user.getId());
+        String token = JwtUtil.generateToken(user.getName(), user.getRole(), user.getId());
         
         // Store JWT in a cookie so the browser remembers the session
         Cookie cookie = new Cookie("jwt", token);
@@ -63,5 +65,16 @@ public class AuthController {
         response.addCookie(cookie);
 
         return "redirect:/events";
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpServletResponse response) {
+        // Expire the JWT cookie immediately
+        Cookie cookie = new Cookie("jwt", "");
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0); // delete immediately
+        response.addCookie(cookie);
+        return "redirect:/";
     }
 }

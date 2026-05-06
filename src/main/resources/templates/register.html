@@ -3,20 +3,160 @@
 <head>
     <title>Register - Eventra</title>
     <link rel="stylesheet" href="/css/style.css">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="auth-body">
 
-<div class="container">
-    <h2>Register</h2>
-
-    <form action="/register" method="post">
-        <input type="text" name="name" placeholder="Name" required><br><br>
-        <input type="email" name="email" placeholder="Email" required><br><br>
-        <input type="password" name="password" placeholder="Password" required><br><br>
-
-        <button type="submit">Register</button>
-    </form>
+<div class="toast-container" th:if="${error}">
+    <div class="toast">
+        <i class="fa fa-exclamation-circle"></i>
+        <span th:text="${error}"></span>
+    </div>
 </div>
+
+<div class="glass-card">
+    <h2>Join Eventra</h2>
+
+    <form action="/register" method="post" id="registerForm">
+        
+        <div class="input-group">
+            <input type="text" name="name" id="name" placeholder="Full Name" required>
+            <i class="fa fa-times clear-icon" onclick="clearField('name')" title="Clear"></i>
+        </div>
+
+        <div class="input-group">
+            <input type="email" name="email" id="email" placeholder="Email Address" required>
+            <i class="fa fa-times clear-icon" onclick="clearField('email')" title="Clear"></i>
+            <span class="validation-msg" id="emailError"></span>
+        </div>
+
+        <div class="input-group">
+            <input type="password" name="password" id="password" placeholder="Password" required oninput="checkPasswordStrength()">
+            <i class="fa fa-times clear-icon" onclick="clearField('password')" title="Clear" style="right: 45px;"></i>
+            <i class="fa fa-eye eye-icon" onclick="togglePassword('password', this)" title="Show Password"></i>
+            <div class="strength-bar-container">
+                <div class="strength-bar" id="strengthBar"></div>
+            </div>
+            <span class="strength-text" id="strengthText"></span>
+        </div>
+
+        <div class="input-group">
+            <input type="password" id="confirmPassword" placeholder="Confirm Password" required oninput="checkPasswordMatch()">
+            <i class="fa fa-times clear-icon" onclick="clearField('confirmPassword')" title="Clear" style="right: 45px;"></i>
+            <i class="fa fa-eye eye-icon" onclick="togglePassword('confirmPassword', this)" title="Show Password"></i>
+            <span class="validation-msg" id="matchError"></span>
+        </div>
+
+        <button type="submit" class="btn-auth" id="submitBtn" disabled>Register</button>
+    </form>
+    <p style="margin-top: 20px; font-size: 14px; color: #fff;">Already have an account? <a href="/login" style="color: #4A90E2; font-weight: bold; text-decoration: none;">Login</a></p>
+</div>
+
+<script>
+    function clearField(id) {
+        document.getElementById(id).value = '';
+        if (id === 'password') checkPasswordStrength();
+        if (id === 'confirmPassword') checkPasswordMatch();
+        validateForm();
+    }
+
+    function togglePassword(id, icon) {
+        const input = document.getElementById(id);
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = "password";
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+
+    let isPasswordValid = false;
+    let isMatchValid = false;
+
+    function checkPasswordStrength() {
+        const pw = document.getElementById('password').value;
+        const bar = document.getElementById('strengthBar');
+        const text = document.getElementById('strengthText');
+        
+        let strength = 0;
+        if (pw.length >= 8) strength++; // length
+        if (pw.match(/[a-z]+/)) strength++; // lowercase
+        if (pw.match(/[A-Z]+/)) strength++; // uppercase
+        if (pw.match(/[0-9]+/)) strength++; // number
+        if (pw.match(/[$@#&!]+/)) strength++; // special
+
+        isPasswordValid = pw.length >= 8;
+
+        if (pw.length === 0) {
+            bar.style.width = '0%';
+            text.innerHTML = '';
+        } else if (strength <= 2) {
+            bar.style.width = '25%';
+            bar.style.background = '#ff4d4d'; // Weak
+            text.innerHTML = '<span style="color: #ffcccc">Weak: Minimum 8 characters needed.</span>';
+            isPasswordValid = false;
+        } else if (strength === 3) {
+            bar.style.width = '50%';
+            bar.style.background = '#ffa64d'; // Medium
+            text.innerHTML = '<span style="color: #ffe6cc">Medium</span>';
+        } else if (strength === 4) {
+            bar.style.width = '75%';
+            bar.style.background = '#ffff4d'; // Better
+            text.innerHTML = '<span style="color: #ffffcc">Better</span>';
+        } else {
+            bar.style.width = '100%';
+            bar.style.background = '#4dff4d'; // Strong
+            text.innerHTML = '<span style="color: #ccffcc">Strong</span>';
+        }
+
+        checkPasswordMatch();
+    }
+
+    function checkPasswordMatch() {
+        const pw = document.getElementById('password').value;
+        const cpw = document.getElementById('confirmPassword').value;
+        const error = document.getElementById('matchError');
+
+        if (cpw.length > 0 && pw !== cpw) {
+            error.innerText = 'Passwords do not match.';
+            isMatchValid = false;
+        } else {
+            error.innerText = '';
+            isMatchValid = (cpw.length > 0 && pw === cpw);
+        }
+        validateForm();
+    }
+
+    document.getElementById('email').addEventListener('input', function() {
+        const email = this.value;
+        const error = document.getElementById('emailError');
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        if (email.length > 0 && !regex.test(email)) {
+            error.innerText = 'Invalid email format.';
+        } else {
+            error.innerText = '';
+        }
+        validateForm();
+    });
+
+    function validateForm() {
+        const email = document.getElementById('email').value;
+        const name = document.getElementById('name').value;
+        const btn = document.getElementById('submitBtn');
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (name.length > 0 && regex.test(email) && isPasswordValid && isMatchValid) {
+            btn.disabled = false;
+        } else {
+            btn.disabled = true;
+        }
+    }
+</script>
 
 </body>
 </html>

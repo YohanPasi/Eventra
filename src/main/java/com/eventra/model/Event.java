@@ -4,33 +4,52 @@ public class Event {
 
     private String eventId;
     private String name;
+    private String location;
     private String date;
-    private double price;
-    private int availableSeats;
+    private String description;
+    private String imageUrl;
+    private java.util.List<TicketPackage> packages = new java.util.ArrayList<>();
 
     public Event() {}
 
-    public Event(String eventId, String name, String date, double price, int availableSeats) {
+    public Event(String eventId, String name, String location, String date, String description, String imageUrl) {
         this.eventId = eventId;
         this.name = name;
+        this.location = location;
         this.date = date;
-        this.price = price;
-        this.availableSeats = availableSeats;
+        this.description = description;
+        this.imageUrl = imageUrl;
     }
 
-    // Getters & Setters
     public String getEventId() { return eventId; }
     public void setEventId(String eventId) { this.eventId = eventId; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
+
     public String getDate() { return date; }
     public void setDate(String date) { this.date = date; }
 
-    public double getPrice() { return price; }
-    public void setPrice(double price) { this.price = price; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public int getAvailableSeats() { return availableSeats; }
-    public void setAvailableSeats(int availableSeats) { this.availableSeats = availableSeats; }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public java.util.List<TicketPackage> getPackages() { return packages; }
+    public void setPackages(java.util.List<TicketPackage> packages) { this.packages = packages; }
+
+    // Helper methods for the UI
+    public Double getStartingPrice() {
+        if (packages == null || packages.isEmpty()) return 0.0;
+        return packages.stream().mapToDouble(TicketPackage::getPrice).min().orElse(0.0);
+    }
+
+    public Integer getTotalSeats() {
+        if (packages == null || packages.isEmpty()) return 0;
+        return packages.stream().mapToInt(TicketPackage::getMaxCount).sum();
+    }
 }

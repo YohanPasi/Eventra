@@ -9,6 +9,12 @@ public class UserService {
 
     private UserRepository userRepository = new UserRepository();
 
+    public boolean usernameExists(String username) {
+        return userRepository.getAllUsers()
+                .stream()
+                .anyMatch(u -> u.getName().equalsIgnoreCase(username));
+    }
+
     public boolean emailExists(String email) {
         return userRepository.getAllUsers()
                 .stream()
@@ -17,7 +23,7 @@ public class UserService {
 
     public boolean registerUser(User user) {
 
-        if (emailExists(user.getEmail())) {
+        if (emailExists(user.getEmail()) || usernameExists(user.getName())) {
             return false;
         }
 
@@ -31,11 +37,11 @@ public class UserService {
         return true;
     }
 
-    public User login(String email, String password) {
+    public User login(String username, String password) {
 
         return userRepository.getAllUsers()
                 .stream()
-                .filter(u -> u.getEmail().equals(email) &&
+                .filter(u -> u.getName().equals(username) &&
                              u.getPassword().equals(password))
                 .findFirst()
                 .orElse(null);

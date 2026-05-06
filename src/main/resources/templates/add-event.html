@@ -1,23 +1,325 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Add Event - Eventra</title>
+    <title th:text="${eventToEdit != null} ? 'Edit Event - Eventra' : 'Add Event - Eventra'">Add Event - Eventra</title>
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: linear-gradient(135deg, #f0f4ff, #ffffff); text-align: left; }
+        .dashboard-wrapper { display: flex; min-height: 100vh; }
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px; background: #0A2540;
+            padding: 30px 20px; display: flex;
+            flex-direction: column; gap: 10px; flex-shrink: 0;
+        }
+        .sidebar .brand { font-family: 'Playfair Display', serif; color: white; font-size: 22px; letter-spacing: 2px; margin-bottom: 30px; text-align: center; }
+        .sidebar a { text-decoration: none; color: #cde4ff; padding: 12px 15px; border-radius: 8px; font-size: 14px; display: flex; align-items: center; gap: 10px; transition: background 0.2s; }
+        .sidebar a:hover, .sidebar a.active { background: rgba(255,255,255,0.1); color: white; }
+        .admin-badge { background: #4A90E2; color: white; font-size: 10px; padding: 2px 8px; border-radius: 20px; margin-left: auto; }
+
+        /* Main */
+        .main-content { flex: 1; padding: 40px; animation: fadeIn 0.8s ease; }
+
+        /* Section card */
+        .section-card {
+            background: white; border-radius: 16px; padding: 36px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.07); margin-bottom: 24px;
+        }
+        .section-card h3 {
+            font-family: 'Playfair Display', serif; font-size: 20px;
+            color: #0A2540; margin-top: 0; margin-bottom: 24px;
+            padding-bottom: 12px; border-bottom: 2px solid #eef3fc;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .section-card h3 i { color: #4A90E2; }
+
+        /* Grid layout for form fields */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-grid .full-width { grid-column: 1 / -1; }
+
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { font-size: 13px; font-weight: 600; color: #444; margin-bottom: 6px; }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            padding: 11px 14px;
+            border: 1px solid #e0e8f5;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px; color: #333; outline: none;
+            transition: border 0.3s, box-shadow 0.3s;
+            box-sizing: border-box;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus { border-color: #4A90E2; box-shadow: 0 0 0 3px rgba(74,144,226,0.12); }
+        .form-group textarea { resize: vertical; min-height: 90px; }
+
+        /* Image upload */
+        .upload-area {
+            display: block; /* label needs to be block */
+            border: 2px dashed #b5cff5;
+            border-radius: 12px; padding: 30px;
+            text-align: center; cursor: pointer;
+            transition: all 0.3s; position: relative;
+            background: #f8fbff;
+        }
+        .upload-area:hover { border-color: #4A90E2; background: #edf4ff; }
+        .upload-area input[type="file"] { display: none; /* Hide input entirely since we use a label */ }
+        .upload-area i { font-size: 36px; color: #4A90E2; margin-bottom: 10px; display: block; }
+        .upload-area p { margin: 0; color: #666; font-size: 13px; }
+        #preview { max-width: 100%; max-height: 200px; border-radius: 8px; margin-top: 12px; display: none; object-fit: cover; margin-left: auto; margin-right: auto; }
+
+        /* Ticket Packages Table */
+        .packages-table { width: 100%; border-collapse: collapse; }
+        .packages-table th {
+            background: #0A2540; color: white;
+            padding: 12px 14px; font-size: 13px;
+            font-weight: 500; text-align: left;
+        }
+        .packages-table th:first-child { border-radius: 8px 0 0 0; }
+        .packages-table th:last-child { border-radius: 0 8px 0 0; }
+        .packages-table td { padding: 10px 8px; border-bottom: 1px solid #eef3fc; }
+        .packages-table td input {
+            width: 100%; padding: 9px 11px; border: 1px solid #e0e8f5;
+            border-radius: 6px; font-size: 13px; font-family: 'Poppins', sans-serif;
+            box-sizing: border-box; outline: none;
+        }
+        .packages-table td input:focus { border-color: #4A90E2; }
+        .btn-remove-row {
+            background: #fff0f0; color: #d63031;
+            border: 1px solid #ffd5d5; padding: 7px 10px;
+            border-radius: 6px; cursor: pointer; font-size: 13px;
+            transition: background 0.2s;
+        }
+        .btn-remove-row:hover { background: #ffdada; }
+        .btn-add-row {
+            background: #eaf3ff; color: #357ABD;
+            border: 1px dashed #4A90E2; padding: 10px 20px;
+            border-radius: 8px; cursor: pointer; font-size: 14px;
+            font-family: 'Poppins', sans-serif; margin-top: 14px;
+            transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-add-row:hover { background: #d0e8ff; }
+
+        /* Tier colour dot */
+        .tier-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+
+        /* Bottom actions */
+        .form-actions { display: flex; gap: 12px; margin-top: 10px; }
+        .btn-submit {
+            background: linear-gradient(135deg, #4A90E2, #357ABD);
+            color: white; border: none; padding: 14px 36px;
+            border-radius: 8px; font-size: 15px; font-family: 'Poppins', sans-serif;
+            font-weight: 600; cursor: pointer; transition: all 0.3s;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(74,144,226,0.4); }
+        .btn-cancel {
+            background: #f5f5f5; color: #666; border: none;
+            padding: 14px 24px; border-radius: 8px; font-size: 14px;
+            font-family: 'Poppins', sans-serif; cursor: pointer; text-decoration: none;
+            display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s;
+        }
+        .btn-cancel:hover { background: #eaeaea; }
+
+        /* Top Header */
+        .top-header {
+            display: flex; justify-content: flex-end; align-items: center;
+            padding-bottom: 20px; margin-bottom: 30px;
+            border-bottom: 1px solid #e0e8f5;
+        }
+        .user-profile {
+            display: flex; align-items: center; gap: 10px;
+            font-family: 'Poppins', sans-serif; font-size: 14px; color: #444; font-weight: 500;
+        }
+        .user-profile img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+
+        /* Footer */
+        .dashboard-footer {
+            margin-top: 40px; padding-top: 20px;
+            border-top: 1px solid #e0e8f5; text-align: center;
+            font-family: 'Poppins', sans-serif; font-size: 13px; color: #888;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Add Event</h2>
+<div class="dashboard-wrapper">
 
-    <form action="/add-event" method="post">
-        <input type="text" name="name" placeholder="Event Name" required><br><br>
-        <input type="date" name="date" required><br><br>
-        <input type="number" name="price" placeholder="Price" step="0.01" required><br><br>
-        <input type="number" name="availableSeats" placeholder="Seats" required><br><br>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="brand">EVENTRA</div>
+        <a href="/events"><i class="fa fa-calendar-alt"></i> Manage Events</a>
+        <a href="/add-event" class="active"><i class="fa fa-plus-circle"></i> Add Event <span class="admin-badge">ADMIN</span></a>
+        <a href="/logout" style="margin-top: auto; color: #ff8080;"><i class="fa fa-sign-out-alt"></i> Logout</a>
+    </div>
 
-        <button type="submit">Create Event</button>
-    </form>
+    <!-- Main -->
+    <div class="main-content">
+        <!-- Top Header -->
+        <div class="top-header">
+            <div class="user-profile">
+                <img src="/images/long-truong-0hbiRNbMgM4-unsplash.jpg" alt="Admin Profile">
+                <span>Admin</span>
+            </div>
+        </div>
+
+        <h2 style="font-family:'Playfair Display',serif; color:#0A2540; margin-top:0; margin-bottom:28px; font-size: 24px;">
+            <i class="fa fa-plus-circle" style="color:#4A90E2;" th:if="${eventToEdit == null}"></i>
+            <i class="fa fa-edit" style="color:#4A90E2;" th:if="${eventToEdit != null}"></i>
+            <span th:text="${eventToEdit != null} ? 'Edit Event: ' + ${eventToEdit.name} : 'Create New Event'">Create New Event</span>
+        </h2>
+
+        <form action="/add-event" method="post" enctype="multipart/form-data" id="eventForm">
+            <!-- Hidden ID field if editing -->
+            <input type="hidden" name="eventId" th:if="${eventToEdit != null}" th:value="${eventToEdit.eventId}">
+
+            <!-- ── SECTION 1: Event Details ── -->
+            <div class="section-card">
+                <h3><i class="fa fa-info-circle"></i> Event Details</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Event Name *</label>
+                        <input type="text" name="name" placeholder="e.g. Tech Summit 2026" required th:value="${eventToEdit != null ? eventToEdit.name : ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>Location *</label>
+                        <input type="text" name="location" placeholder="e.g. BMICH, Colombo" required th:value="${eventToEdit != null ? eventToEdit.location : ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>Event Date *</label>
+                        <input type="date" name="date" required th:value="${eventToEdit != null ? eventToEdit.date : ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <!-- spacer -->
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Event Description *</label>
+                        <textarea name="description" placeholder="Describe what attendees can expect from this event..." required th:text="${eventToEdit != null ? eventToEdit.description : ''}"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── SECTION 2: Event Image ── -->
+            <div class="section-card">
+                <h3><i class="fa fa-image"></i> Event Image</h3>
+                <label class="upload-area" for="imageInput">
+                    <!-- Image is not strictly required when editing because we preserve the old one -->
+                    <input type="file" id="imageInput" name="eventImage" accept="image/*" onchange="previewImage(this)">
+                    <div id="uploadPlaceholder" th:style="${eventToEdit != null and eventToEdit.imageUrl != null and eventToEdit.imageUrl != '' ? 'display:none;' : ''}">
+                        <i class="fa fa-cloud-upload-alt"></i>
+                        <p><strong th:text="${eventToEdit != null ? 'Click to upload a NEW image' : 'Click to upload'}">Click to upload</strong> or drag & drop</p>
+                        <p>PNG, JPG, WEBP up to 15MB — will be stored on Cloudinary</p>
+                    </div>
+                    <img id="preview" th:src="${eventToEdit != null ? eventToEdit.imageUrl : ''}" alt="Preview" th:style="${eventToEdit != null and eventToEdit.imageUrl != null and eventToEdit.imageUrl != '' ? 'display:block;' : 'display:none;'}">
+                </label>
+            </div>
+
+            <!-- ── SECTION 3: Ticket Packages ── -->
+            <div class="section-card">
+                <h3><i class="fa fa-ticket-alt"></i> Ticket Packages</h3>
+                <p style="color:#777; font-size:13px; margin-top:-12px; margin-bottom:20px;">
+                    Define ticket tiers for this event (e.g. VIP, General, Student). Add as many as needed.
+                </p>
+
+                <table class="packages-table" id="packagesTable">
+                    <thead>
+                        <tr>
+                            <th style="width:18%">Tier Name</th>
+                            <th style="width:16%">Price (Rs.)</th>
+                            <th style="width:16%">Max Tickets</th>
+                            <th>Benefits / Inclusions</th>
+                            <th style="width:60px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="packageRows">
+                        <!-- If Creating New or Event has no packages -->
+                        <tr th:if="${eventToEdit == null or #lists.isEmpty(eventToEdit?.packages)}">
+                            <td><input type="text" name="tierName" placeholder="e.g. VIP" required></td>
+                            <td><input type="number" name="price" placeholder="0.00" step="0.01" min="0" required></td>
+                            <td><input type="number" name="maxCount" placeholder="e.g. 50" min="1" required></td>
+                            <td><input type="text" name="benefits" placeholder="e.g. Front row, Complimentary dinner"></td>
+                            <td><button type="button" class="btn-remove-row" onclick="removeRow(this)"><i class="fa fa-trash"></i></button></td>
+                        </tr>
+
+                        <!-- If Editing and Event has packages -->
+                        <tr th:if="${eventToEdit != null and not #lists.isEmpty(eventToEdit?.packages)}" th:each="pkg : ${eventToEdit?.packages}">
+                            <td><input type="text" name="tierName" placeholder="e.g. VIP" required th:value="${pkg.tierName}"></td>
+                            <td><input type="number" name="price" placeholder="0.00" step="0.01" min="0" required th:value="${pkg.price}"></td>
+                            <td><input type="number" name="maxCount" placeholder="e.g. 50" min="1" required th:value="${pkg.maxCount}"></td>
+                            <td><input type="text" name="benefits" placeholder="e.g. Front row, Complimentary dinner" th:value="${pkg.benefits}"></td>
+                            <td><button type="button" class="btn-remove-row" onclick="removeRow(this)"><i class="fa fa-trash"></i></button></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <button type="button" class="btn-add-row" onclick="addRow()">
+                    <i class="fa fa-plus"></i> Add Ticket Tier
+                </button>
+            </div>
+
+            <!-- ── Actions ── -->
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">
+                    <i class="fa fa-check" th:if="${eventToEdit == null}"></i> 
+                    <span th:if="${eventToEdit == null}">Create Event</span>
+                    <i class="fa fa-save" th:if="${eventToEdit != null}"></i> 
+                    <span th:if="${eventToEdit != null}">Save Changes</span>
+                </button>
+                <a href="/events" class="btn-cancel"><i class="fa fa-times"></i> Cancel</a>
+            </div>
+
+        </form>
+        
+        <!-- Dashboard Footer -->
+        <div class="dashboard-footer">
+            &copy; 2026 Eventra. All rights reserved. Premium Event Management System.
+        </div>
+    </div>
 </div>
+
+<script>
+    function addRow() {
+        const tbody = document.getElementById('packageRows');
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><input type="text" name="tierName" placeholder="e.g. General" required></td>
+            <td><input type="number" name="price" placeholder="0.00" step="0.01" min="0" required></td>
+            <td><input type="number" name="maxCount" placeholder="e.g. 200" min="1" required></td>
+            <td><input type="text" name="benefits" placeholder="e.g. General seating"></td>
+            <td><button type="button" class="btn-remove-row" onclick="removeRow(this)"><i class="fa fa-trash"></i></button></td>
+        `;
+        tbody.appendChild(row);
+    }
+
+    function removeRow(btn) {
+        const rows = document.querySelectorAll('#packageRows tr');
+        if (rows.length <= 1) {
+            alert('At least one ticket tier is required.');
+            return;
+        }
+        btn.closest('tr').remove();
+    }
+
+    function previewImage(input) {
+        const preview = document.getElementById('preview');
+        const placeholder = document.getElementById('uploadPlaceholder');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                preview.src = e.target.result;
+                preview.style.display = 'inline-block';
+                placeholder.style.display = 'none';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
 
 </body>
 </html>
